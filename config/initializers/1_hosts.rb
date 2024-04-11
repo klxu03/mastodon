@@ -32,5 +32,8 @@ Rails.application.configure do
     config.hosts << web_host if web_host.present?
     config.hosts.concat(alternate_domains) if alternate_domains.present?
     config.host_authorization = { exclude: ->(request) { request.path == '/health' } }
+
+    config.hosts << "beta.stacky.social"
+    config.hosts << "/.*\.stacky\.social/"
   end
 end
