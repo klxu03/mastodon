@@ -165,7 +165,7 @@ export function directCompose(account, routerHistory) {
 }
 
 export function submitCompose(routerHistory) {
-  return function (dispatch, getState) {
+  return async function (dispatch, getState) {
     const status   = getState().getIn(['compose', 'text'], '');
     const media    = getState().getIn(['compose', 'media_attachments']);
     const statusId = getState().getIn(['compose', 'id'], null);
@@ -195,6 +195,9 @@ export function submitCompose(routerHistory) {
         };
       });
     }
+
+    const res = await axios.get("http://localhost:3001/greetings");
+    console.log({res})
 
     api(getState).request({
       url: statusId === null ? '/api/v1/statuses' : `/api/v1/statuses/${statusId}`,
