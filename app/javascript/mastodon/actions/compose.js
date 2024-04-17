@@ -196,8 +196,12 @@ export function submitCompose(routerHistory) {
       });
     }
 
-    const res = await axios.get("http://localhost:3001/greetings");
-    console.log({res})
+    try {
+      const res = await axios.get("http://beta.stacky.social:3001/greetings");
+      console.log({res})
+    } catch (e) {
+      console.error("Error in fetching greetings", e)
+    }
 
     api(getState).request({
       url: statusId === null ? '/api/v1/statuses' : `/api/v1/statuses/${statusId}`,
