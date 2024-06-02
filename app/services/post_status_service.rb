@@ -82,6 +82,10 @@ class PostStatusService < BaseService
     ApplicationRecord.transaction do
       @status.save!
     end
+
+    # NOTE: add api call request to index the status.
+    api_response = Stacky::CurateApiHelper.index_status(@status)
+    puts "DEBUG:: Create statues from local curate api response: #{api_response}"
   end
 
   def safeguard_mentions!(status)

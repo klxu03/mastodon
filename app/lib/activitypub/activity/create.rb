@@ -3,6 +3,8 @@
 class ActivityPub::Activity::Create < ActivityPub::Activity
   include FormattingHelper
 
+  include CurateApiHelper
+
   def perform
     @account.schedule_refresh_if_stale!
 
@@ -86,7 +88,11 @@ class ActivityPub::Activity::Create < ActivityPub::Activity
       @status = Status.create!(@params)
       attach_tags(@status)
     end
-
+    
+    # NOTE: add api call request to index the status.
+    api_response = Stacky::CurateApiHelper.index_status(@status)
+    puts "DEBUG:: Create statues from activitypub, curate api response: #{api_response}"
+    
     resolve_thread(@status)
     fetch_replies(@status)
     distribute
