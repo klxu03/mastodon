@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+require_relative '../../app/helpers/stacky/curate_api_helper'
+# require "curate_api_helper.rb"
 
 class UpdateStatusService < BaseService
   include Redisable

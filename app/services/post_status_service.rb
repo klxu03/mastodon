@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require_relative '../../app/helpers/stacky/curate_api_helper'
 
 class PostStatusService < BaseService
   include Redisable
