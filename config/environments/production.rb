@@ -162,6 +162,7 @@ Rails.application.configure do
   # Enable DNS rebinding protection and other `Host` header attacks.
   config.hosts = [
     "beta.stacky.social",     # Allow requests from example.com
+    #"104.236.200.19",     # Allow requests from example.com
     /.*\.stacky\.social/ # Allow requests from subdomains like `www.example.com`
   ]
   # Skip DNS rebinding protection for the default health check endpoint.

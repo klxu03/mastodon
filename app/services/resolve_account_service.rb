@@ -16,6 +16,10 @@ class ResolveAccountService < BaseService
   # @option options [Boolean] :suppress_errors When failing, return nil instead of raising an error
   # @return [Account]
   def call(uri, options = {})
+    puts "TOM DEBUG::44 Resolve Account Service indeed being called!"
+    puts uri
+    puts "uri END"
+
     return if uri.blank?
 
     process_options!(uri, options)
