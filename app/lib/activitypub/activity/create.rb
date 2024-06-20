@@ -93,6 +93,9 @@ class ActivityPub::Activity::Create < ActivityPub::Activity
     # NOTE: add api call request to index the status.
     api_response = Stacky::CurateApiHelper.index_status(@status)
     puts "DEBUG:: Create statues from activitypub, curate api response: #{api_response}"
+    puts "PARAMS "
+    Rails.logger.info @params
+    puts "PARAMS END"
 
     resolve_thread(@status)
     fetch_replies(@status)

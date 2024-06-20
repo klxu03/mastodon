@@ -8,9 +8,11 @@ class ActivityPub::InboxesController < ActivityPub::BaseController
   skip_before_action :authenticate_user!
 
   def create
-    upgrade_account
-    process_collection_synchronization
-    process_payload
+    Rails.logger.info 'TOM DEBUG:: inbox controller created!'
+    puts 'TOM DEBUG:: inbox controller created!'
+    upgrade_account #NOTE: security measure
+    process_collection_synchronization #NOTE: for a relay Announce, here the new user Account is fetched into the database.
+    process_payload #NOTE: here the new statuses is fetched with the given url (relay).
     head 202
   end
 
@@ -49,6 +51,8 @@ class ActivityPub::InboxesController < ActivityPub::BaseController
   def upgrade_account
     if signed_request_account&.ostatus?
       signed_request_account.update(last_webfingered_at: nil)
+      puts "TOM DEBUG::12 Resolving Account! For acct="
+      puts signed_request_account.acct
       ResolveAccountWorker.perform_async(signed_request_account.acct)
     end
 
@@ -57,6 +61,7 @@ class ActivityPub::InboxesController < ActivityPub::BaseController
 
   def process_collection_synchronization
     raw_params = request.headers['Collection-Synchronization']
+    # puts "TOM DEBUG:: Collection-Synchronization"
     return if raw_params.blank? || ENV['DISABLE_FOLLOWERS_SYNCHRONIZATION'] == 'true' || signed_request_account.nil?
 
     # Re-using the syntax for signature parameters
@@ -68,6 +73,14 @@ class ActivityPub::InboxesController < ActivityPub::BaseController
   end
 
   def process_payload
+    # Rails.logger.info 'TOM DEBUG:: inbox controller process_payload activated!'
+    puts 'TOM DEBUG:: inbox controller process_payload activated!'
+    puts "signed_request_actor.id, body, @account&.id, signed_request_actor.class.name"
+    puts signed_request_actor.id
+    puts body
+    puts @account&.id
+    puts signed_request_actor.class.name
     ActivityPub::ProcessingWorker.perform_async(signed_request_actor.id, body, @account&.id, signed_request_actor.class.name)
+    puts "Process Payload END"
   end
 end

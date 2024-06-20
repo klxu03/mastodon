@@ -7,6 +7,10 @@ class ActivityPub::ProcessCollectionService < BaseService
     @account = actor
     @json    = original_json = Oj.load(body, mode: :strict)
     @options = options
+    puts "TOM DEBUG:: ProcessCollectionService call body"
+
+    puts @json
+    puts @account
 
     return unless @json.is_a?(Hash)
 
