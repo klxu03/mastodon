@@ -2,7 +2,7 @@
 
 class Stacky::DataInjectionController < ApplicationController
 
-  skip_before_action :verify_authenticity_token, only: :add
+  skip_before_action :verify_authenticity_token, only: [:add, :delete, :modify]
   def add
     puts "TOM DEBUG::32 data injection add endpoint reached"
     puts params # try to receive the POST params!
@@ -24,13 +24,13 @@ class Stacky::DataInjectionController < ApplicationController
   def modify
     puts "TOM DEBUG::32 data injection modify endpoint reached"
     puts params
-    render plain: 'Inject Successfully'
+    render json: {msg: 'Modify Successfully', params: params}
   end
 
   def delete
     puts "TOM DEBUG::32 data injection delete endpoint reached"
     puts params
-    render plain: 'Inject Successfully'
+    render json: {msg: 'Delete Successfully', params: params}
   end
 
   def inject_post(params)
