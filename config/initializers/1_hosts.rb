@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 port     = ENV.fetch('PORT') { 3000 }
-host     = ENV.fetch('LOCAL_DOMAIN') { "0.0.0.0:#{port}" }
-web_host = ENV.fetch('WEB_DOMAIN') { host }
+streaming_port     = ENV.fetch('STREAMING_PORT') { 4000 }
+host     = ENV.fetch('LOCAL_DOMAIN') { "127.0.0.1:#{port}" }
+web_host = ENV.fetch('WEB_DOMAIN') { "104.236.200.19:#{port}" }
 
 alternate_domains = ENV.fetch('ALTERNATE_DOMAINS') { '' }.split(/\s*,\s*/)
 
@@ -23,7 +24,7 @@ Rails.application.configure do
     if Rails.env.production?
       "ws#{https ? 's' : ''}://#{web_host}"
     else
-      "ws://104.236.200.19:4000"
+      "ws://#{host.split(':').first}:#{streaming_port}" #TODO: THIS PORT MUST BE SET WITH STREAMING_PORT as env param.
     end
   end
 
