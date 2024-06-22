@@ -12,6 +12,13 @@ class ActivityPub::ProcessAccountService < BaseService
   # Should be called with confirmed valid JSON
   # and WebFinger-resolved username and domain
   def call(username, domain, json, options = {})
+    puts 'TOM DEBUG::77 ActivityPub::ProcessAccountService call method reached'
+    puts username
+    puts domain
+    puts json
+    puts options
+    puts 'END'
+
     return if json['inbox'].blank? || unsupported_uri_scheme?(json['id']) || domain_not_allowed?(domain)
 
     @options     = options

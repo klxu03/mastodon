@@ -18,6 +18,7 @@ class ResolveAccountService < BaseService
   def call(uri, options = {})
     puts "TOM DEBUG::44 Resolve Account Service indeed being called!"
     puts uri
+    puts options
     puts "uri END"
 
     return if uri.blank?
@@ -28,16 +29,21 @@ class ResolveAccountService < BaseService
     # record with the URI already, and if so, we can exit early
 
     return if domain_not_allowed?(@domain)
+    puts "TOM DEBUG::CHECKPOINT 0"
 
     @account ||= Account.find_remote(@username, @domain)
-
+    puts "TOM DEBUG::CHECKPOINT 1.0"
+    # puts  @account&.local?
+    # puts @domain.nil?
+    # puts !webfinger_update_due?
     return @account if @account&.local? || @domain.nil? || !webfinger_update_due?
 
+    puts "TOM DEBUG::CHECKPOINT 1.2"
     # At this point we are in need of a Webfinger query, which may
     # yield us a different username/domain through a redirect
     process_webfinger!(@uri)
     @domain = nil if TagManager.instance.local_domain?(@domain)
-
+    # puts "TOM DEBUG::CHECKPOINT 1"
     # Because the username/domain pair may be different than what
     # we already checked, we need to check if we've already got
     # the record with that URI, again
@@ -45,6 +51,7 @@ class ResolveAccountService < BaseService
     return if domain_not_allowed?(@domain)
 
     @account ||= Account.find_remote(@username, @domain)
+    # puts "TOM DEBUG::CHECKPOINT 2"
 
     if gone_from_origin? && not_yet_deleted?
       queue_deletion!
@@ -56,7 +63,9 @@ class ResolveAccountService < BaseService
     # Now it is certain, it is definitely a remote account, and it
     # either needs to be created, or updated from fresh data
 
+    # puts "TOM DEBUG::CHECKPOINT 3"
     fetch_account!
+    # puts "TOM DEBUG::CHECKPOINT 4"
   rescue Webfinger::Error => e
     Rails.logger.debug { "Webfinger query for #{@uri} failed: #{e}" }
     raise unless @options[:suppress_errors]
@@ -82,6 +91,7 @@ class ResolveAccountService < BaseService
               end
 
     @uri = [@username, @domain].compact.join('@')
+    # puts "TOM DEBUG::URI: #{@uri}"
   end
 
   def process_webfinger!(uri)
