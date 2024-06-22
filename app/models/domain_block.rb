@@ -46,7 +46,7 @@ class DomainBlock < ApplicationRecord
 
   class << self
     def suspend?(domain)
-      !!rule_for(domain)&.suspend?
+      !!rule_for(domain)&.suspend? # NOTE: my guess is that rule_for returns a database entry (YES! table=domain_blocks, which stores all the blocked domain)
     end
 
     def silence?(domain)

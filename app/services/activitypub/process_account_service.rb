@@ -72,6 +72,72 @@ class ActivityPub::ProcessAccountService < BaseService
     nil
   end
 
+  # stacky data injection service call method
+  # used for injecting external users into the database
+  def stacky_inject_data_call(username, domain, json, options = {})
+    puts 'TOM DEBUG::772 ActivityPub::ProcessAccountService data injection call method reached'
+    puts username
+    puts domain
+    puts json
+    puts options
+    puts 'END'
+
+    return if json['inbox'].blank? || unsupported_uri_scheme?(json['id']) || domain_not_allowed?(domain)
+
+    @options     = options
+    @json        = json
+    @uri         = @json['id']
+    @username    = username
+    @domain      = TagManager.instance.normalize_domain(domain)
+    @collections = {}
+
+    # The key does not need to be unguessable, it just needs to be somewhat unique
+    @options[:request_id] ||= "#{Time.now.utc.to_i}-#{username}@#{domain}"
+    # for inserted external user, we don't fetch its avatar and other data.
+    @options[:skip_download] ||= true
+
+    with_redis_lock("process_account:#{@uri}") do
+      @account            = Account.remote.find_by(uri: @uri) if @options[:only_key]
+      @account          ||= Account.find_remote(@username, @domain)
+      @old_public_key     = @account&.public_key
+      @old_protocol       = @account&.protocol
+      @suspension_changed = false
+
+      if @account.nil?
+        with_redis do |redis|
+          return nil if redis.pfcount("unique_subdomains_for:#{PublicSuffix.domain(@domain, ignore_private: true)}") >= SUBDOMAINS_RATELIMIT
+
+          discoveries = redis.incr("discovery_per_request:#{@options[:request_id]}")
+          redis.expire("discovery_per_request:#{@options[:request_id]}", 5.minutes.seconds)
+          return nil if discoveries > DISCOVERIES_PER_REQUEST
+        end
+
+        create_account
+      end
+
+      update_account
+      process_tags
+
+      process_duplicate_accounts! if @options[:verified_webfinger]
+    end
+
+    # NOTE: Disabling the following code block for now, as it is not clear what it is doing.
+    #
+    # after_protocol_change! if protocol_changed?
+    # after_key_change! if key_changed? && !@options[:signed_with_known_key]
+    # clear_tombstones! if key_changed?
+    # after_suspension_change! if suspension_changed?
+    #
+    # unless @options[:only_key] || @account.suspended?
+    #   check_featured_collection! if @account.featured_collection_url.present? # NOTE: Q: what is featured collection?
+    #   check_featured_tags_collection! if @json['featuredTags'].present?
+    #   check_links! if @account.fields.any?(&:requires_verification?)
+    # end
+
+    @account
+  rescue Oj::ParseError
+    nil
+  end
   private
 
   def create_account
@@ -88,6 +154,7 @@ class ActivityPub::ProcessAccountService < BaseService
 
     @account.save!
   end
+
 
   def update_account
     @account.last_webfingered_at = Time.now.utc unless @options[:only_key]
@@ -130,7 +197,7 @@ class ActivityPub::ProcessAccountService < BaseService
     @account.public_key = public_key || ''
   end
 
-  def set_fetchable_attributes!
+  def set_fetchable_attributes! #NOTE: fetch the avatar and image related to the user
     begin
       @account.avatar_remote_url = image_url('icon') || '' unless skip_download?
       @account.avatar = nil if @account.avatar_remote_url.blank?
@@ -294,7 +361,7 @@ class ActivityPub::ProcessAccountService < BaseService
   end
 
   def skip_download?
-    @account.suspended? || domain_block&.reject_media?
+    @account.suspended? || domain_block&.reject_media? || @options[:skip_download]
   end
 
   def auto_suspend?
