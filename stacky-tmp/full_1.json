@@ -1,0 +1,59 @@
+{
+  "text": "This is the content",
+  "performing_actor_uri": "https://my-reddit.com/tom_from_reddit",
+  "users": [
+    {
+      "username": "tom_from_reddit",
+      "domain": "my-reddit.com",
+      "json": {
+        "id": "https://my-reddit.com/tom_from_reddit",
+        "inbox": "http://my-reddit.com/user/tom_from_reddit/fake_inbox",
+        "outbox": "http://my-reddit.com/user/tom_from_reddit/fake_outbox",
+        "name": "TOM_RED_DISPLAYYYY"
+      }
+    },
+    {
+      "username": "another_user",
+      "domain": "another-domain.com",
+      "json": {
+        "id": "https://another-domain.com/another_user",
+        "inbox": "http://another-domain.com/user/another_user/fake_inbox",
+        "outbox": "http://another-domain.com/user/another_user/fake_outbox",
+        "name": "ANOTHER_USER_DISPLAY"
+      }
+    },
+    {
+      "username": "third_user",
+      "domain": "third-domain.org",
+      "json": {
+        "id": "https://third-domain.org/third_user",
+        "inbox": "http://third-domain.org/user/third_user/fake_inbox",
+        "outbox": "http://third-domain.org/user/third_user/fake_outbox",
+        "name": "THIRD_USER_DISPLAY"
+      }
+    }
+  ],
+  "status": {
+    "@context": "https://www.w3.org/ns/activitystreams",
+    "id": "https://my-reddit.com/tom_from_reddit/statuses/1234567890",
+    "type": "Create",
+    "actor": {
+      "id": "https://my-reddit.com/tom_from_reddit",
+      "type": "Person",
+      "name": "TOM_RED_DISPLAYYYY"
+    },
+    "published": "2024-06-24T00:00:00Z",
+    "to": ["https://www.w3.org/ns/activitystreams#Public"],
+    "cc": [
+      "http://my-reddit.com/user/tom_from_reddit/fake_inbox",
+      "http://my-reddit.com/user/tom_from_reddit/fake_outbox"
+    ],
+    "object": {
+      "id": "https://my-reddit.com/tom_from_reddit/statuses/1234567890",
+      "type": "Note",
+      "attributedTo": "https://my-reddit.com/tom_from_reddit",
+      "content": "This is the content"
+    }
+  }
+}
+
