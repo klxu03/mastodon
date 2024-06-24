@@ -13,7 +13,7 @@ class ActivityPub::FetchRemoteStatusService < BaseService
 
     @request_id = request_id || "#{Time.now.utc.to_i}-status-#{uri}"
     @json = if prefetched_body.nil?
-              fetch_resource(uri, true, on_behalf_of)
+              fetch_resource(uri, true, on_behalf_of) # NOTE: give out REST request to get the data, for injection we have a prefetched_body!
             else
               body_to_json(prefetched_body, compare_id: uri)
             end
@@ -24,11 +24,11 @@ class ActivityPub::FetchRemoteStatusService < BaseService
     activity_json = nil
     object_uri    = nil
 
-    if expected_object_type?
+    if expected_object_type? # NOTE: if this is describing an image/video/audio/question/note...
       actor_uri     = value_or_id(first_of_value(@json['attributedTo']))
       activity_json = { 'type' => 'Create', 'actor' => actor_uri, 'object' => @json }
       object_uri    = uri_from_bearcap(@json['id'])
-    elsif expected_activity_type?
+    elsif expected_activity_type? # NOTE: this should be our data injection branch
       actor_uri     = value_or_id(first_of_value(@json['actor']))
       activity_json = @json
       object_uri    = uri_from_bearcap(value_or_id(@json['object']))
@@ -37,13 +37,17 @@ class ActivityPub::FetchRemoteStatusService < BaseService
     return if activity_json.nil? || object_uri.nil? || !trustworthy_attribution?(@json['id'], actor_uri)
     return if expected_actor_uri.present? && actor_uri != expected_actor_uri
     return ActivityPub::TagManager.instance.uri_to_resource(object_uri, Status) if ActivityPub::TagManager.instance.local_uri?(object_uri)
-
-    actor = account_from_uri(actor_uri)
+    actor = if @json[:injection_flag].nil? # NOTE: if injection flag is on, do not try to do a remote update.
+              account_from_uri(actor_uri)
+            else
+              account_from_local_uri(actor_uri)
+            end
 
     return if actor.nil? || actor.suspended?
 
     # If we fetched a status that already exists, then we need to treat the
     # activity as an update rather than create
+    # NOTE: seems that we don't need a separate update path. As long as the uri maintains the same, it will automatically get treated.
     activity_json['type'] = 'Update' if equals_or_includes_any?(activity_json['type'], %w(Create)) && Status.exists?(uri: object_uri, account_id: actor.id)
 
     with_redis do |redis|
@@ -68,7 +72,10 @@ class ActivityPub::FetchRemoteStatusService < BaseService
     actor = ActivityPub::FetchRemoteAccountService.new.call(uri, request_id: @request_id) if actor.nil? || actor.possibly_stale?
     actor
   end
-
+  def account_from_local_uri(uri)
+    actor = ActivityPub::TagManager.instance.uri_to_resource(uri, Account)
+    actor
+  end
   def supported_context?
     super(@json)
   end
