@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require_relative "../../helpers/stacky/curate_api_helper"
 
 class ActivityPub::ProcessStatusUpdateService < BaseService
   include JsonLdHelper
@@ -26,6 +27,10 @@ class ActivityPub::ProcessStatusUpdateService < BaseService
     else
       handle_implicit_update!
     end
+
+    # NOTE: add api call request to update the index the status that comes from remote/injection.
+    api_response = Stacky::CurateApiHelper.update_index_status(@status)
+    puts "DEBUG:: Update statues from activitypub, curate api response: #{api_response}"
 
     @status
   end
