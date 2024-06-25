@@ -61,6 +61,7 @@ module Stacky::CurateApiHelper
   end
 
   def self.request_body(status)
+    puts "DEBUG BODY=#{{ body: status.text, id: status.id, origin: server_origin }}"
     { body: status.text, id: status.id, origin: server_origin }
   end
 

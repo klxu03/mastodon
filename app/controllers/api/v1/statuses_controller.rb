@@ -99,6 +99,11 @@ class Api::V1::StatusesController < Api::BaseController
     @status = Status.where(account: current_account).find(params[:id])
     authorize @status, :destroy?
 
+    # NOTE: add api call request to update the index the status that comes from remote/injection.
+    # Call before actually destroying the status
+    api_response = Stacky::CurateApiHelper.delete_index_status(@status)
+    puts "DEBUG:: Delete statues from activitypub, curate api response: #{api_response}"
+
     @status.discard_with_reblogs
     StatusPin.find_by(status: @status)&.destroy
     @status.account.statuses_count = @status.account.statuses_count - 1

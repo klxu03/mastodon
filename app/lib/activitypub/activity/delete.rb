@@ -47,6 +47,11 @@ class ActivityPub::Activity::Delete < ActivityPub::Activity
   end
 
   def delete_now!
+    # NOTE: add api call request to update the index the status that comes from remote/injection.
+    # Add before calling to prevent status from being deleted before the index is updated.
+    api_response = Stacky::CurateApiHelper.delete_index_status(@status)
+    puts "DEBUG:: Delete statues from activitypub, curate api response: #{api_response}"
+
     RemoveStatusService.new.call(@status, redraft: false)
   end
 end
