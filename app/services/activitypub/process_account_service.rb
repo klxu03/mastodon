@@ -27,6 +27,7 @@ class ActivityPub::ProcessAccountService < BaseService
     @username    = username
     @domain      = TagManager.instance.normalize_domain(domain)
     @collections = {}
+    @ext_flag   = nil
 
     # The key does not need to be unguessable, it just needs to be somewhat unique
     @options[:request_id] ||= "#{Time.now.utc.to_i}-#{username}@#{domain}"
@@ -90,6 +91,7 @@ class ActivityPub::ProcessAccountService < BaseService
     @username    = username
     @domain      = TagManager.instance.normalize_domain(domain)
     @collections = {}
+    @ext_flag    = "stacky-user-injection"
 
     # The key does not need to be unguessable, it just needs to be somewhat unique
     @options[:request_id] ||= "#{Time.now.utc.to_i}-#{username}@#{domain}"
@@ -149,6 +151,8 @@ class ActivityPub::ProcessAccountService < BaseService
     @account.suspended_at      = domain_block.created_at if auto_suspend?
     @account.suspension_origin = :local if auto_suspend?
     @account.silenced_at       = domain_block.created_at if auto_silence?
+    # NOTE: ext flag should be set to true for injected user!
+    @account.ext_flag          = @ext_flag
 
     set_immediate_protocol_attributes!
 
