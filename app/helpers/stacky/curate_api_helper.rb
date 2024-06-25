@@ -35,23 +35,43 @@ module Stacky::CurateApiHelper
     puts "Error: #{e.message}"
     nil
   end
+
+
+
   def self.index_status(status)
     # extract the status information
-    # TODO
     # and then call the GET api endpoints
-    # self.get("http://example.com/api/endpoint")
-    # or POST
-    body = { body: status.text, id: status.id }
-    post("http://beta.stacky.social:3002/insert", body)
-    "stub index success >>>> status id: #{status.id} msg: #{status.text}"
+    res = post('http://beta.stacky.social:3002/insert', request_body(status))
+    "stub index success >>>> status id: #{status.id} msg: #{status.text} res: #{res}"
   end
   def self.update_index_status(status)
     # extract the status information
-    # TODO
     # and then call the post to api endpoints
-    body = { body: status.text, id: status.id }
-    post("http://beta.stacky.social:3002/update", body)
-    "stub update index success >>>> status: #{status.id} msg: #{status.text}"
+    res = post('http://beta.stacky.social:3002/update', request_body(status))
+
+    "stub update index success >>>> status: #{status.id} msg: #{status.text} res: #{res}"
+  end
+
+  def self.delete_index_status(status)
+    # extract the status information
+    # and then call the post to api endpoints
+    res = post('http://beta.stacky.social:3002/delete', request_body(status))
+
+    "stub delete index success >>>> status: #{status.id} msg: #{status.text} res: #{res}"
+  end
+
+  def self.request_body(status)
+    { body: status.text, id: status.id, origin: server_origin }
+  end
+
+  def self.server_origin
+    if Rails.env.development?
+      'development'
+    elsif Rails.env.production?
+      'production'
+    else
+      'test'
+    end
   end
 
 end
