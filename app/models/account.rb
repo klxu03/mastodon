@@ -51,6 +51,7 @@
 #  reviewed_at                   :datetime
 #  requested_review_at           :datetime
 #  indexable                     :boolean          default(FALSE), not null
+#  ext_flag                      :string
 #
 
 class Account < ApplicationRecord
