@@ -139,6 +139,7 @@ class ActivityPub::Activity::Create < ActivityPub::Activity
       media_attachment_ids: attachment_ids,
       ordered_media_attachment_ids: attachment_ids,
       poll: process_poll,
+      ext_flag: @json[:injection_flag], #NOTE: this is the injection flag passed in with stacky endpoint.
     }
   end
 
