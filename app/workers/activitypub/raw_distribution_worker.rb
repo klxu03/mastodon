@@ -15,6 +15,7 @@ class ActivityPub::RawDistributionWorker
     @json            = json
     @exclude_inboxes = exclude_inboxes
 
+
     distribute!
   rescue ActiveRecord::RecordNotFound
     true
@@ -24,6 +25,11 @@ class ActivityPub::RawDistributionWorker
 
   def distribute!
     return if inboxes.empty?
+    # NOTE: If ext_flag is shown in either account or activitypub message, cut outgoing traffic.
+    if @account.ext_flag || payload[:ext_flag]
+      puts 'DEBUG:: action related to injected posts, cut outgoing traffic'
+      return
+    end
 
     ActivityPub::DeliveryWorker.push_bulk(inboxes, limit: 1_000) do |inbox_url|
       [payload, source_account_id, inbox_url, options]

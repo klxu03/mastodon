@@ -37,7 +37,7 @@ class ActivityPub::FetchRemoteStatusService < BaseService
     return if activity_json.nil? || object_uri.nil? || !trustworthy_attribution?(@json['id'], actor_uri)
     return if expected_actor_uri.present? && actor_uri != expected_actor_uri
     return ActivityPub::TagManager.instance.uri_to_resource(object_uri, Status) if ActivityPub::TagManager.instance.local_uri?(object_uri)
-    actor = if @json[:injection_flag].nil? # NOTE: if injection flag is on, do not try to do a remote update.
+    actor = if @json[:ext_flag].nil? # NOTE: if injection flag is on, do not try to do a remote update.
               account_from_uri(actor_uri)
             else
               account_from_local_uri(actor_uri)
