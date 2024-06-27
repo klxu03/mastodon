@@ -32,13 +32,19 @@ class PostStatusService < BaseService
   # @option [String] :idempotency Optional idempotency key
   # @option [Boolean] :with_rate_limit
   # @option [Enumerable] :allowed_mentions Optional array of expected mentioned account IDs, raises `UnexpectedMentionsError` if unexpected accounts end up in mentions
+  # @option [String] :internal NOTE: Optional whether the post created should be internal or not. Leave nil if not internal (for compatibility)
   # @return [Status]
   def call(account, options = {})
     @account     = account
     @options     = options
     @text        = @options[:text] || ''
     @in_reply_to = @options[:thread]
+    # NOTE: Create Ext Flag, with some priority. (There might be a switch on how to deal with internal posts)
     @ext_flag    = 'stacky-status-injection-reply-local' unless @in_reply_to.ext_flag.nil?
+    if @options[:internal].present?
+      @ext_flag  = 'stacky-status' if @ext_flag.nil?
+      @ext_flag += '-internal'  # NOTE: add an internal flag to the post's ext flag.
+    end
 
     return idempotency_duplicate if idempotency_given? && idempotency_duplicate?
 

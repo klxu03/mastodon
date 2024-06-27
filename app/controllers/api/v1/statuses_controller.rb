@@ -67,6 +67,7 @@ class Api::V1::StatusesController < Api::BaseController
       scheduled_at: status_params[:scheduled_at],
       application: doorkeeper_token.application,
       poll: status_params[:poll],
+      internal: status_params[:internal],
       allowed_mentions: status_params[:allowed_mentions],
       idempotency: request.headers['Idempotency-Key'],
       with_rate_limit: true
@@ -140,6 +141,7 @@ class Api::V1::StatusesController < Api::BaseController
       :visibility,
       :language,
       :scheduled_at,
+      :internal, # NOTE: if this is passed in, means this post is internal and should not be distribute.
       allowed_mentions: [],
       media_ids: [],
       media_attributes: [
