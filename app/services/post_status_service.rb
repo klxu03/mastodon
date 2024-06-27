@@ -49,7 +49,7 @@ class PostStatusService < BaseService
       if @in_reply_to.ext_flag.include? 'injection'
         @ext_flag += '-injection'
       end
-      @ext_flag += 'status-local-reply'
+      @ext_flag += '-status-local-reply'
     end
 
     if @options[:internal].present?
