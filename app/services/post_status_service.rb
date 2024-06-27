@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require_relative "../helpers/stacky/curate_api_helper"
+require_relative '../helpers/stacky/curate_api_helper'
 
 class PostStatusService < BaseService
   include Redisable
@@ -39,8 +39,19 @@ class PostStatusService < BaseService
     @options     = options
     @text        = @options[:text] || ''
     @in_reply_to = @options[:thread]
+
     # NOTE: Create Ext Flag, with some priority. (There might be a switch on how to deal with internal posts)
-    @ext_flag    = 'stacky-status-injection-reply-local' unless @in_reply_to.ext_flag.nil?
+    if @in_reply_to.ext_flag.present?
+      @ext_flag = 'stacky'
+      if @in_reply_to.ext_flag.include? 'internal'
+        @ext_flag += '-internal'
+      end
+      if @in_reply_to.ext_flag.include? 'injection'
+        @ext_flag += '-injection'
+      end
+      @ext_flag += 'status-local-reply'
+    end
+
     if @options[:internal].present?
       @ext_flag  = 'stacky-status' if @ext_flag.nil?
       @ext_flag += '-internal'  # NOTE: add an internal flag to the post's ext flag.
