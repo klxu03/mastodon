@@ -38,6 +38,7 @@ class PostStatusService < BaseService
     @options     = options
     @text        = @options[:text] || ''
     @in_reply_to = @options[:thread]
+    @ext_flag    = 'stacky-status-injection-reply-local' unless @in_reply_to.ext_flag.nil?
 
     return idempotency_duplicate if idempotency_given? && idempotency_duplicate?
 
@@ -198,6 +199,7 @@ class PostStatusService < BaseService
       language: valid_locale_cascade(@options[:language], @account.user&.preferred_posting_language, I18n.default_locale),
       application: @options[:application],
       rate_limit: @options[:with_rate_limit],
+      ext_flag: @ext_flag
     }.compact
   end
 

@@ -54,6 +54,7 @@ class Api::V1::StatusesController < Api::BaseController
   end
 
   def create
+    puts "TOM DEBUG::create status"
     @status = PostStatusService.new.call(
       current_user.account,
       text: status_params[:status],

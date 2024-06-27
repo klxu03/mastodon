@@ -24,6 +24,7 @@ class ActivityPub::RawDistributionWorker
   protected
 
   def distribute!
+    puts "TOM DEBUG inboxes=#{inboxes}, @account.ext_flag || payload[:ext_flag]= #{@account.ext_flag || payload[:ext_flag]}"
     return if inboxes.empty?
     # NOTE: If ext_flag is shown in either account or activitypub message, cut outgoing traffic.
     if @account.ext_flag || payload[:ext_flag]

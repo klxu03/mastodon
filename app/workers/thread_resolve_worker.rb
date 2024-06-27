@@ -16,6 +16,8 @@ class ThreadResolveWorker
     return if parent_status.nil?
 
     child_status.thread = parent_status
+    # mark as external if this is a reply to external thread.
+    child_status.ext_flag = 'stacky-status-injection-reply' if parent_status.ext_flag.nil? == false
     child_status.save!
 
     DistributionWorker.perform_async(child_status_id, { 'skip_notifications' => true }) if child_status.within_realtime_window?
