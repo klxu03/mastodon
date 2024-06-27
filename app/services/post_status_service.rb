@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-require_relative "../helpers/stacky/curate_api_helper"
+require_relative '../helpers/stacky/curate_api_helper'
 
 class PostStatusService < BaseService
   include Redisable
@@ -32,12 +32,30 @@ class PostStatusService < BaseService
   # @option [String] :idempotency Optional idempotency key
   # @option [Boolean] :with_rate_limit
   # @option [Enumerable] :allowed_mentions Optional array of expected mentioned account IDs, raises `UnexpectedMentionsError` if unexpected accounts end up in mentions
+  # @option [String] :internal NOTE: Optional whether the post created should be internal or not. Leave nil if not internal (for compatibility)
   # @return [Status]
   def call(account, options = {})
     @account     = account
     @options     = options
     @text        = @options[:text] || ''
     @in_reply_to = @options[:thread]
+
+    # NOTE: Create Ext Flag, with some priority. (There might be a switch on how to deal with internal posts)
+    if @in_reply_to.ext_flag.present?
+      @ext_flag = 'stacky'
+      if @in_reply_to.ext_flag.include? 'internal'
+        @ext_flag += '-internal'
+      end
+      if @in_reply_to.ext_flag.include? 'injection'
+        @ext_flag += '-injection'
+      end
+      @ext_flag += '-status-local-reply'
+    end
+
+    if @options[:internal].present?
+      @ext_flag  = 'stacky-status' if @ext_flag.nil?
+      @ext_flag += '-internal'  # NOTE: add an internal flag to the post's ext flag.
+    end
 
     return idempotency_duplicate if idempotency_given? && idempotency_duplicate?
 
@@ -198,6 +216,7 @@ class PostStatusService < BaseService
       language: valid_locale_cascade(@options[:language], @account.user&.preferred_posting_language, I18n.default_locale),
       application: @options[:application],
       rate_limit: @options[:with_rate_limit],
+      ext_flag: @ext_flag
     }.compact
   end
 

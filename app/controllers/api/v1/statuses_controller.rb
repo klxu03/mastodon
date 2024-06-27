@@ -54,6 +54,7 @@ class Api::V1::StatusesController < Api::BaseController
   end
 
   def create
+    puts "TOM DEBUG::create status"
     @status = PostStatusService.new.call(
       current_user.account,
       text: status_params[:status],
@@ -66,6 +67,7 @@ class Api::V1::StatusesController < Api::BaseController
       scheduled_at: status_params[:scheduled_at],
       application: doorkeeper_token.application,
       poll: status_params[:poll],
+      internal: status_params[:internal],
       allowed_mentions: status_params[:allowed_mentions],
       idempotency: request.headers['Idempotency-Key'],
       with_rate_limit: true
@@ -98,6 +100,11 @@ class Api::V1::StatusesController < Api::BaseController
   def destroy
     @status = Status.where(account: current_account).find(params[:id])
     authorize @status, :destroy?
+
+    # NOTE: add api call request to update the index the status that comes from remote/injection.
+    # Call before actually destroying the status
+    api_response = Stacky::CurateApiHelper.delete_index_status(@status)
+    puts "DEBUG:: Delete statues from activitypub, curate api response: #{api_response}"
 
     @status.discard_with_reblogs
     StatusPin.find_by(status: @status)&.destroy
@@ -134,6 +141,7 @@ class Api::V1::StatusesController < Api::BaseController
       :visibility,
       :language,
       :scheduled_at,
+      :internal, # NOTE: if this is passed in, means this post is internal and should not be distribute.
       allowed_mentions: [],
       media_ids: [],
       media_attributes: [

@@ -24,7 +24,7 @@ class Api::V1::Statuses::PinsController < Api::V1::Statuses::BaseController
   private
 
   def distribute_add_activity!
-    json = ActiveModelSerializers::SerializableResource.new(
+    json = ActiveModelSerializers::SerializableResource.new( #NOTE: check if serializer would keep the ext_flag in json. if not, add a cond for it here and below.
       @status,
       serializer: ActivityPub::AddSerializer,
       adapter: ActivityPub::Adapter

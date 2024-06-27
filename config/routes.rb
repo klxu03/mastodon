@@ -222,9 +222,9 @@ Rails.application.routes.draw do
   get '/privacy-policy', to: 'privacy#show', as: :privacy_policy
   get '/terms',          to: redirect('/privacy-policy')
 
-  post 'inject-data/add', to: 'stacky/data_injection#add'
-  post 'inject-data/modify/:id', to: 'stacky/data_injection#modify'
-  post 'inject-data/delete/:id', to: 'stacky/data_injection#delete'
+  post 'inject-data/add', to: 'stacky/data_injection#add', constraints: { domain: 'localhost' }
+  post 'inject-data/modify/:id', to: 'stacky/data_injection#modify', constraints: { domain: 'localhost' }
+  post 'inject-data/delete/:id', to: 'stacky/data_injection#delete', constraints: { domain: 'localhost' }
   match '/', via: [:post, :put, :patch, :delete], to: 'application#raise_not_found', format: false
   match '*unmatched_route', via: :all, to: 'application#raise_not_found', format: false
 end

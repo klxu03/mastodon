@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require_relative "../helpers/stacky/curate_api_helper"
 
 class RemoveStatusService < BaseService
   include Redisable
@@ -48,6 +49,8 @@ class RemoveStatusService < BaseService
       end
 
       @status.destroy! if permanently?
+
+
     end
   end
 

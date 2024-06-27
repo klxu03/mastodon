@@ -41,7 +41,7 @@ class UpdateStatusService < BaseService
 
     # NOTE: add api call request to update index the status.
     api_response = Stacky::CurateApiHelper.update_index_status(@status)
-    puts "DEBUG:: Update statues from local curate api response: #{api_response}"
+    puts "DEBUG:: Update statues from local | curate api response: #{api_response}"
     @status
   rescue NoChangesSubmittedError
     # For calls that result in no changes, swallow the error
