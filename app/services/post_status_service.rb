@@ -41,14 +41,10 @@ class PostStatusService < BaseService
     @in_reply_to = @options[:thread]
 
     # NOTE: Create Ext Flag, with some priority. (There might be a switch on how to deal with internal posts)
-    if @in_reply_to.ext_flag.present?
+    if @in_reply_to.present? && @in_reply_to.ext_flag.present?
       @ext_flag = 'stacky'
-      if @in_reply_to.ext_flag.include? 'internal'
-        @ext_flag += '-internal'
-      end
-      if @in_reply_to.ext_flag.include? 'injection'
-        @ext_flag += '-injection'
-      end
+      @ext_flag += '-internal' if @in_reply_to.ext_flag.include? 'internal'
+      @ext_flag += '-injection' if @in_reply_to.ext_flag.include? 'injection'
       @ext_flag += '-status-local-reply'
     end
 

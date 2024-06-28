@@ -1,0 +1,5 @@
+curl http://beta.stacky.social/inject-data/delete/32 \
+  -H "Content-Type: application/json" \
+  --data-binary @full_1.json \
+  -X POST
+
