@@ -47,7 +47,7 @@ module Stacky::CurateApiHelper
     # extract the status information
     # and then call the GET api endpoints
     res = post('https://beta.stacky.social:3002/insert', request_body(status))
-    "stub index success >>>> status id: #{status.id} msg: #{status.text} res: #{res}"
+    "stub index success >>>> status id: #{status.id} msg: #{status.text} visibility: #{status.visibility} res: #{res}"
   end
   def self.update_index_status(status)
     # extract the status information
@@ -67,7 +67,7 @@ module Stacky::CurateApiHelper
 
   def self.request_body(status)
     puts "DEBUG BODY=#{{ body: status.text, id: status.id, origin: server_origin }}"
-    { body: status.text, id: status.id, origin: server_origin }
+    { body: status.text, id: status.id, visibility: status.visibility, origin: server_origin }
   end
 
   def self.server_origin
