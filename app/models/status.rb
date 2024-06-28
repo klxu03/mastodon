@@ -467,4 +467,16 @@ class Status < ApplicationRecord
   def trigger_update_webhooks
     TriggerWebhookWorker.perform_async('status.updated', 'Status', id) if local?
   end
+
+  def internal?
+    ext_flag.present?
+  end
+
+  def injected?
+    ext_flag.include? 'injection'
+  end
+
+  def marked_internal?
+    ext_flag.include? 'internal'
+  end
 end
