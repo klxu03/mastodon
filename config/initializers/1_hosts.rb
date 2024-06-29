@@ -35,6 +35,8 @@ Rails.application.configure do
     config.host_authorization = { exclude: ->(request) { request.path == '/health' } }
 
     config.hosts << "beta.stacky.social"
+    config.hosts << "localhost"
+    config.hosts << "127.0.0.1"
     config.hosts << "/.*\.stacky\.social/"
   end
 end
