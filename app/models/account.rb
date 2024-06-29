@@ -500,6 +500,18 @@ class Account < ApplicationRecord
     save!
   end
 
+
+  def internal?
+    ext_flag.present?
+  end
+
+  def injected?
+    ext_flag.include? 'injection'
+  end
+
+  def marked_internal?
+    ext_flag.include? 'internal'
+  end
   private
 
   def prepare_contents
@@ -550,7 +562,4 @@ class Account < ApplicationRecord
     TriggerWebhookWorker.perform_async('account.updated', 'Account', id) if local?
   end
 
-  def internal?
-    ext_flag.present?
-  end
 end
