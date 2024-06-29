@@ -216,17 +216,17 @@ class Account < ApplicationRecord
   end
 
   def possibly_stale?
-    last_webfingered_at.nil? || last_webfingered_at <= 1.day.ago
+    !internal? && (last_webfingered_at.nil? || last_webfingered_at <= 1.day.ago)
   end
 
-  def schedule_refresh_if_stale!
-    return unless last_webfingered_at.present? && last_webfingered_at <= BACKGROUND_REFRESH_INTERVAL.ago
+  def schedule_refresh_if_stale! # NOTE: do not attempt to do a webfinger update for internal users.
+    return unless last_webfingered_at.present? && last_webfingered_at <= BACKGROUND_REFRESH_INTERVAL.ago && !internal?
 
     AccountRefreshWorker.perform_in(rand(6.hours.to_i), id)
   end
 
   def refresh!
-    ResolveAccountService.new.call(acct) unless local?
+    ResolveAccountService.new.call(acct) unless local? || internal?
   end
 
   def silenced?
@@ -547,5 +547,9 @@ class Account < ApplicationRecord
   # NOTE: the `account.created` webhook is triggered by the `User` model, not `Account`.
   def trigger_update_webhooks
     TriggerWebhookWorker.perform_async('account.updated', 'Account', id) if local?
+  end
+
+  def internal?
+    ext_flag.present?
   end
 end
