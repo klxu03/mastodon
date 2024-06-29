@@ -36,7 +36,9 @@ class FollowService < BaseService
     # and the feeds are being merged
     mark_home_feed_as_partial! if @source_account.not_following_anyone?
 
-    if (@target_account.locked? && !@options[:bypass_locked]) || @source_account.silenced? || @target_account.activitypub?
+    if @target_account.internal? # NOTE: if the account is injected, welcome everyone to follow it.
+      inserted_user_direct_follow!
+    elsif (@target_account.locked? && !@options[:bypass_locked]) || @source_account.silenced? || @target_account.activitypub?
       request_follow!
     elsif @target_account.local?
       direct_follow!
@@ -86,6 +88,15 @@ class FollowService < BaseService
     follow
   end
 
+  def inserted_user_direct_follow!
+    follow = @source_account.follow!(@target_account, **follow_options.merge(rate_limit: @options[:with_rate_limit], bypass_limit: @options[:bypass_limit]))
+
+    # NOTE: do not notify the inserted remote account.
+    # LocalNotificationWorker.perform_async(@target_account.id, follow.id, follow.class.name, 'follow')
+    MergeWorker.perform_async(@target_account.id, @source_account.id)
+
+    follow
+  end
   def build_json(follow_request)
     Oj.dump(serialize_payload(follow_request, ActivityPub::FollowSerializer))
   end
