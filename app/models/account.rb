@@ -115,6 +115,7 @@ class Account < ApplicationRecord
   scope :without_internal, -> { where(id: 1...) }
   scope :remote, -> { where.not(domain: nil) }
   scope :local, -> { where(domain: nil) }
+  scope :internal, -> { where.not(ext_flag: nil) } # NOTE: internal users means those having a non nil ext_flag
   scope :partitioned, -> { order(Arel.sql('row_number() over (partition by domain)')) }
   scope :silenced, -> { where.not(silenced_at: nil) }
   scope :suspended, -> { where.not(suspended_at: nil) }
