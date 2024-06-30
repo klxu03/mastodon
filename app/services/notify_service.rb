@@ -22,6 +22,7 @@ class NotifyService < BaseService
 
     def dismiss?
       blocked   = @recipient.unavailable?
+      blocked ||= @recipient.internal? # NOTE: inserted users should not be notified.
       blocked ||= from_self? && @notification.type != :poll && @notification.type != :severed_relationships
 
       return blocked if message? && from_staff?
