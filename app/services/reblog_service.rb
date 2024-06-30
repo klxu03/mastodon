@@ -16,7 +16,7 @@ class ReblogService < BaseService
 
     authorize_with account, reblogged_status, :reblog?
 
-    reblog = account.statuses.find_by(reblog: reblogged_status)
+    reblog = account.statuses.find_by(reblog: reblogged_status) # NOTE: return if reblog already exist
 
     return reblog unless reblog.nil?
 
@@ -26,7 +26,7 @@ class ReblogService < BaseService
                    options[:visibility] || account.user&.setting_default_privacy
                  end
 
-    reblog = account.statuses.create!(reblog: reblogged_status, text: '', visibility: visibility, rate_limit: options[:with_rate_limit])
+    reblog = account.statuses.create!(reblog: reblogged_status, text: '', visibility: visibility, rate_limit: options[:with_rate_limit], ext_flag: reblogged_status.ext_flag_reblog) # NOTE: if the reblog has ext_flag, the reblog status should also be marked.
 
     Trends.register!(reblog)
     DistributionWorker.perform_async(reblog.id)

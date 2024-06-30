@@ -396,7 +396,23 @@ class Status < ApplicationRecord
   def marked_internal?
     ext_flag.include? 'internal'
   end
-  private
+
+  # NOTE: function for getting various ext_flag
+
+  def reblog
+    append_if_not_present(ext_flag, "-reblog")
+  end
+
+  def reply
+    append_if_not_present(ext_flag, "-reply")
+  end
+
+  def internal
+    append_if_not_present(ext_flag, "-internal")
+  end
+
+  delegate :reblog, :reply, :internal, to: :ext_flag, prefix: true, allow_nil: true
+
 
   def update_status_stat!(attrs)
     return if marked_for_destruction? || destroyed?

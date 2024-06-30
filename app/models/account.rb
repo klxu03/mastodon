@@ -512,7 +512,34 @@ class Account < ApplicationRecord
   def marked_internal?
     ext_flag.include? 'internal'
   end
-  private
+
+  # NOTE: function for getting various ext_flag
+
+  def reblog
+    append_if_not_present(ext_flag, "-reblog")
+  end
+
+  def reply
+    append_if_not_present(ext_flag, "-reply")
+  end
+
+  def internal
+    append_if_not_present(ext_flag, "-internal")
+  end
+
+  delegate :reblog, :reply, :internal, to: :ext_flag, prefix: true, allow_nil: true
+
+
+  def append_if_not_present(base_string, suffix)
+    return nil unless base_string.present?
+
+    # Check if the base_string already ends with the suffix
+    if base_string.end_with?(suffix)
+      base_string
+    else
+      "#{base_string}#{suffix}"
+    end
+  end
 
   def prepare_contents
     display_name&.strip!

@@ -67,7 +67,7 @@ class Api::V1::StatusesController < Api::BaseController
       scheduled_at: status_params[:scheduled_at],
       application: doorkeeper_token.application,
       poll: status_params[:poll],
-      internal: status_params[:internal],
+      internal: status_params[:internal], # NOTE: to make a post internal. internal: "true"
       allowed_mentions: status_params[:allowed_mentions],
       idempotency: request.headers['Idempotency-Key'],
       with_rate_limit: true
